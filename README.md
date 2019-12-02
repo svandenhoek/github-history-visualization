@@ -17,6 +17,6 @@ mkdir myGourceDir
 cd myGourceDir
 sh visualizationPreprocessing.sh -g github_username/repo -i /local/path/to/repo [-i /local/path/to/repo]...
 sh runGource.sh -1280x720 --key --title "myTitle" --date-format "%Y-%m-%d" --dir-font-size 20 --user-scale 3 --caption-duration 2 --caption-size 30 --logo /path/to/logo.png --logo-offset 10x10
-sh runMmpeg.sh
+sh runFfmpeg.sh
 ```
 
