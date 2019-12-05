@@ -62,34 +62,33 @@ function digestCommandLine {
 
 function prepare {
 	mkdir gource_input
-	cd gource_input
 }
 
 function processGitRepos {
 	# Creates logs for all input files.
 	for REPO in ${REPOS[@]}
 	do
-		local REPO_NAME=${REPO##*/}
-		local LOG_FILE="$REPO_NAME"'.txt'
+		local REPO_NAME=$(basename "$REPO")
+		local LOG_FILE='./gource_input/'"$REPO_NAME"'.txt'
 		# Generates log.
-		gource --output-custom-log "$LOG_FILE" "$REPO"
+		gource --git-branch master --output-custom-log "$LOG_FILE" "$REPO"
 		# Adds custom root based on repository name.
 		sed -i '' "s#\(.*|\)#\1/$REPO_NAME#g" "$LOG_FILE"
 	done
 
 	# Merges and sorts log files into a single file.
-	cat *.txt | sort -n >> combined.txt
+	cat ./gource_input/*.txt | sort -n >> ./gource_input/combined.txt
 
 	# Prepends a ROOT node to the file.
-	local ROOT_TIME=$(($(head -n 1 combined.txt | sed 's/|.*$//g') - 10000000))
-	echo "$ROOT_TIME"'|ROOT|A|.ROOT' > combined_new.txt
-	cat combined.txt >> combined_new.txt
-	mv combined_new.txt combined.txt
+	local ROOT_TIME=$(($(head -n 1 ./gource_input/combined.txt | sed 's/|.*$//g') - 10000000))
+	echo "$ROOT_TIME"'|ROOT|A|.ROOT' > ./gource_input/combined_new.txt
+	cat ./gource_input/combined.txt >> ./gource_input/combined_new.txt
+	mv ./gource_input/combined_new.txt ./gource_input/combined.txt
 }
 
 function retrieveGitHubReleases {
-	python3 "$BASE_PATH"retrieveGitHubReleases.py "$GITHUB" captions.txt
-	sort -n -o captions.txt captions.txt
+	python3 "$BASE_PATH"retrieveGitHubReleases.py "$GITHUB" master ./gource_input/captions.txt
+	sort -n -o ./gource_input/captions.txt ./gource_input/captions.txt
 }
 
 main $@

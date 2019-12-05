@@ -31,9 +31,14 @@
 # --logo <path>
 # --logo-offset <Y>x<X>
 
+# The ffmpeg -ss removes the initial 8 seconds so that the creation of the ROOT user/node is not shown
+# in the final output and the ROOT user should have faded away again before the video starts.
+
 gource $@ --stop-at-end --disable-input \
 --hide root,bloom,filenames,usernames \
 --dir-name-depth 1 --dir-name-position 1 --highlight-dirs \
---seconds-per-day 0.08 --disable-auto-skip --max-file-lag 0.01 --file-idle-time 0 \
+--seconds-per-day 0.082 --disable-auto-skip --max-file-lag 0.01 --file-idle-time 0 \
 --caption-file ./gource_input/captions.txt \
---output-ppm-stream gource.ppm ./gource_input/combined.txt
+--output-ppm-stream - ./gource_input/combined.txt \
+| ffmpeg -r 60 -f image2pipe -vcodec ppm -i - \
+-vcodec libx264 -preset medium -pix_fmt yuv420p -crf 1 -threads 0 -bf 0 -ss 8 gource.mp4

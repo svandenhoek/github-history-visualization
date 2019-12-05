@@ -3,7 +3,7 @@
 Name:	retrieveGithubReleases.py
 
 Usage:
-	retrieveGithubReleases.py user/repo outFile
+	retrieveGithubReleases.py user/repo branch outFile
 
 Description:
 	Retrieve release information for a specific GitHub repository.
@@ -23,7 +23,7 @@ def main():
 	# Disables InsecureRequestWarning. See also: https://urllib3.readthedocs.org/en/latest/security.html
 	disable_warnings(InsecureRequestWarning)
 
-	fileWriter = open(argv[2], 'w')
+	fileWriter = open(argv[3], 'w')
 	retrieveReleasesFromGithub(fileWriter, "https://api.github.com/repos/" + argv[1] + "/releases")
 	fileWriter.flush()
 	fileWriter.close()
@@ -39,8 +39,10 @@ def retrieveReleasesFromGithub(fileWriter, apiUrl):
 
 	# Disgests the response and writes it to the output file.
 	for release in response.json():
-		releaseDate = datetime.strptime(release["published_at"], "%Y-%m-%dT%H:%M:%SZ")
-		fileWriter.write(releaseDate.strftime("%s") + "|" + release["name"] + "\n")
+		# Filters releases on defined branch.
+		if release["target_commitish"] == argv[2]:
+			releaseDate = datetime.strptime(release["published_at"], "%Y-%m-%dT%H:%M:%SZ")
+			fileWriter.write(releaseDate.strftime("%s") + "|" + release["name"] + "\n")
 	
 	# Checks if there is a next page, and does a recursive call if this is true.
 	if "next" in response.links:
